@@ -12,49 +12,75 @@ const productSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: true,
-    min: 0
+    required: true
   },
-  originalPrice: {
+  discount: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100
+  },
+  finalPrice: {
+    type: Number,
+    required: true
+  },
+  stock: {
     type: Number,
     required: true,
-    min: 0
-  },
-  category: {
-    type: String,
-    required: true,
-    enum: ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Beauty', 'Toys']
-  },
-  brand: {
-    type: String,
-    required: true
+    default: 0
   },
   images: [{
     type: String,
     required: true
   }],
-  stock: {
-    type: Number,
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
+  },
+  subCategory: {
+    type: String,
+    trim: true
+  },
+  tags: [{
+    type: String,
+    enum: ['hot', 'trending', 'offer', 'new', 'bestseller']
+  }],
+  brand: {
+    type: String,
     required: true,
-    min: 0,
-    default: 0
+    trim: true
   },
   ratings: {
-    average: { type: Number, default: 0 },
+    average: { type: Number, default: 0, min: 0, max: 5 },
     count: { type: Number, default: 0 }
   },
-  specifications: {
-    type: Map,
-    of: String
-  },
-  isActive: {
+  reviews: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Review'
+  }],
+  isFeatured: {
     type: Boolean,
-    default: true
+    default: false
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, {
   timestamps: true
 });
 
-productSchema.index({ name: 'text', description: 'text' });
+// Calculate final price before saving
+productSchema.pre('save', function(next) {
+  this.finalPrice = this.price - (this.price * this.discount / 100);
+  next();
+});
+
+// Index for search and filtering
+productSchema.index({ name: 'text', description: 'text', brand: 'text' });
+productSchema.index({ category: 1, finalPrice: 1 });
+productSchema.index({ tags: 1 });
 
 module.exports = mongoose.model('Product', productSchema);

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../services/api';
 
-// Async thunks
+// Fetch Products
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async (params = {}, { rejectWithValue }) => {
@@ -14,6 +14,7 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+// Fetch Single Product
 export const fetchProduct = createAsyncThunk(
   'products/fetchProduct',
   async (id, { rejectWithValue }) => {
@@ -26,6 +27,7 @@ export const fetchProduct = createAsyncThunk(
   }
 );
 
+// Fetch Categories
 export const fetchCategories = createAsyncThunk(
   'products/fetchCategories',
   async (_, { rejectWithValue }) => {
@@ -38,81 +40,57 @@ export const fetchCategories = createAsyncThunk(
   }
 );
 
-const initialState = {
-  products: [],
-  currentProduct: null,
-  categories: [],
-  isLoading: false,
-  error: null,
-  totalPages: 1,
-  currentPage: 1,
-  filters: {
-    search: '',
-    category: '',
-    minPrice: '',
-    maxPrice: '',
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-  },
-};
-
 const productSlice = createSlice({
   name: 'products',
-  initialState,
+  initialState: {
+    products: [],
+    currentProduct: null,
+    categories: [],
+    loading: false,
+    error: null,
+    filters: {
+      search: '',
+      category: '',
+      minPrice: '',
+      maxPrice: ''
+    },
+    pagination: {
+      current: 1,
+      pages: 1,
+      total: 0
+    }
+  },
   reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
     setFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload };
-    },
-    clearFilters: (state) => {
-      state.filters = {
-        search: '',
-        category: '',
-        minPrice: '',
-        maxPrice: '',
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-      };
-    },
-    clearCurrentProduct: (state) => {
-      state.currentProduct = null;
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Products
       .addCase(fetchProducts.pending, (state) => {
-        state.isLoading = true;
+        state.loading = true;
         state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loading = false;
         state.products = action.payload.products;
-        state.totalPages = action.payload.totalPages;
-        state.currentPage = action.payload.currentPage;
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
-        state.isLoading = false;
+        state.loading = false;
         state.error = action.payload;
-      })
-      // Fetch Single Product
-      .addCase(fetchProduct.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
       })
       .addCase(fetchProduct.fulfilled, (state, action) => {
-        state.isLoading = false;
         state.currentProduct = action.payload.product;
       })
-      .addCase(fetchProduct.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      // Fetch Categories
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categories = action.payload.categories;
       });
-  },
+  }
 });
 
-export const { setFilters, clearFilters, clearCurrentProduct } = productSlice.actions;
+export const { clearError, setFilters } = productSlice.actions;
 export default productSlice.reducer;

@@ -13,14 +13,23 @@ const register = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, role, adminKey } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const user = await User.create({ name, email, password });
+    // Validate admin role
+    let userRole = 'user';
+    if (role === 'admin') {
+      if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+        return res.status(400).json({ message: 'Invalid admin key' });
+      }
+      userRole = 'admin';
+    }
+
+    const user = await User.create({ name, email, password, role: userRole });
     const token = generateToken(user._id);
 
     res.status(201).json({

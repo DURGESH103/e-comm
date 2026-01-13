@@ -17,9 +17,9 @@ export const loginUser = createAsyncThunk(
 
 export const registerUser = createAsyncThunk(
   'auth/register',
-  async ({ name, email, password }, { rejectWithValue }) => {
+  async ({ name, email, password, role, adminKey }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/auth/register', { name, email, password });
+      const response = await api.post('/auth/register', { name, email, password, role, adminKey });
       localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
