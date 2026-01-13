@@ -20,6 +20,9 @@ const productSchema = new mongoose.Schema({
     min: 0,
     max: 100
   },
+  finalPrice: {
+    type: Number
+  },
   stock: {
     type: Number,
     required: true,
@@ -68,14 +71,11 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Virtual for final price calculation
-productSchema.virtual('finalPrice').get(function() {
-  return this.price - (this.price * this.discount / 100);
+// Pre-save middleware to calculate finalPrice
+productSchema.pre('save', function(next) {
+  this.finalPrice = this.price - (this.price * this.discount / 100);
+  next();
 });
-
-// Ensure virtual fields are serialized
-productSchema.set('toJSON', { virtuals: true });
-productSchema.set('toObject', { virtuals: true });
 
 // Index for search and filtering
 productSchema.index({ name: 'text', description: 'text', brand: 'text' });

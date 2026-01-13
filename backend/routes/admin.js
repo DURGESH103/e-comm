@@ -5,7 +5,9 @@ const {
   deleteProduct,
   addCategory,
   getProducts,
-  getCategories
+  getCategories,
+  getOrders,
+  updateOrderStatus
 } = require('../controllers/adminController');
 const { auth, adminAuth } = require('../middleware/auth');
 
@@ -20,5 +22,9 @@ router.get('/products', auth, adminAuth, getProducts);
 // Admin Category Routes
 router.post('/categories', auth, adminAuth, addCategory);
 router.get('/categories', auth, adminAuth, getCategories);
+
+// Admin Order Routes
+router.get('/orders', auth, adminAuth, getOrders);
+router.put('/orders/:id', auth, adminAuth, updateOrderStatus);
 
 module.exports = router;

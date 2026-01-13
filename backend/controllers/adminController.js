@@ -1,13 +1,28 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
+const Order = require('../models/Order');
 
 // Admin: Add Product
 const addProduct = async (req, res) => {
   try {
-    const productData = {
+    console.log('Received product data:', req.body);
+    
+    let productData = {
       ...req.body,
       createdBy: req.user._id
     };
+    
+    // If category is a string, try to find or create the category
+    if (typeof productData.category === 'string' && !productData.category.match(/^[0-9a-fA-F]{24}$/)) {
+      let category = await Category.findOne({ name: productData.category });
+      if (!category) {
+        category = await Category.create({
+          name: productData.category,
+          createdBy: req.user._id
+        });
+      }
+      productData.category = category._id;
+    }
     
     const product = new Product(productData);
     await product.save();
@@ -19,6 +34,7 @@ const addProduct = async (req, res) => {
       product
     });
   } catch (error) {
+    console.error('Error adding product:', error);
     res.status(400).json({
       success: false,
       message: error.message
@@ -200,6 +216,56 @@ const getCategories = async (req, res) => {
   }
 };
 
+// Admin: Get All Orders
+const getOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate('user', 'name email')
+      .populate('items.product', 'name images')
+      .sort('-createdAt');
+    
+    res.json({
+      success: true,
+      orders
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Admin: Update Order Status
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    ).populate('user', 'name email');
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      order
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   addProduct,
   updateProduct,
@@ -207,5 +273,7 @@ module.exports = {
   addCategory,
   getProducts,
   getProduct,
-  getCategories
+  getCategories,
+  getOrders,
+  updateOrderStatus
 };

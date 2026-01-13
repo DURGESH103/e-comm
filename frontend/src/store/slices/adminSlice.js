@@ -32,7 +32,7 @@ export const getCategories = createAsyncThunk(
   'admin/getCategories',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/products/categories');
+      const response = await api.get('/admin/categories');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);

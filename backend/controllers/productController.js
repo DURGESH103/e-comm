@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 
 const getProducts = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const getProducts = async (req, res) => {
       sortOrder = 'desc' 
     } = req.query;
 
-    const query = { isActive: true };
+    const query = {};
 
     if (category) query.category = category;
     if (search) query.$text = { $search: search };
@@ -27,6 +28,7 @@ const getProducts = async (req, res) => {
     sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
     const products = await Product.find(query)
+      .populate('category', 'name')
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -36,9 +38,11 @@ const getProducts = async (req, res) => {
     res.json({
       success: true,
       products,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      total
+      pagination: {
+        current: parseInt(page),
+        pages: Math.ceil(total / limit),
+        total
+      }
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -47,7 +51,7 @@ const getProducts = async (req, res) => {
 
 const getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('category', 'name');
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -84,11 +88,7 @@ const updateProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { isActive: false },
-      { new: true }
-    );
+    const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -100,8 +100,9 @@ const deleteProduct = async (req, res) => {
 
 const getCategories = async (req, res) => {
   try {
-    const categories = await Product.distinct('category', { isActive: true });
-    res.json({ success: true, categories });
+    const categories = await Category.find({ isActive: true }).select('name');
+    const categoryNames = categories.map(cat => cat.name);
+    res.json({ success: true, categories: categoryNames });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

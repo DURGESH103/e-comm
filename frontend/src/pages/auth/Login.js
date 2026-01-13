@@ -27,10 +27,10 @@ const Login = () => {
       if (role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate(from, { replace: true });
+        navigate('/user/home', { replace: true });
       }
     }
-  }, [isAuthenticated, role, navigate, from]);
+  }, [isAuthenticated, role, navigate]);
 
   useEffect(() => {
     if (error) {

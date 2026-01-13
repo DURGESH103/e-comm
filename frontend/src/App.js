@@ -25,6 +25,10 @@ import OrderDetail from './pages/user/OrderDetail';
 import Wishlist from './pages/user/Wishlist';
 import Profile from './pages/user/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AddProduct from './pages/admin/AddProduct';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminOrders from './pages/admin/AdminOrders';
 
 function AppContent() {
   useEffect(() => {
@@ -46,7 +50,34 @@ function AppContent() {
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id" element={<ProductDetail />} />
             
-            {/* User Protected Routes */}
+            {/* User Routes */}
+            <Route path="/user/home" element={
+              <ProtectedRoute userOnly>
+                <Home />
+              </ProtectedRoute>
+            } />
+            <Route path="/user/product/:id" element={
+              <ProtectedRoute userOnly>
+                <ProductDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/user/cart" element={
+              <ProtectedRoute userOnly>
+                <Cart />
+              </ProtectedRoute>
+            } />
+            <Route path="/user/wishlist" element={
+              <ProtectedRoute userOnly>
+                <Wishlist />
+              </ProtectedRoute>
+            } />
+            <Route path="/user/orders" element={
+              <ProtectedRoute userOnly>
+                <Orders />
+              </ProtectedRoute>
+            } />
+            
+            {/* Legacy routes for backward compatibility */}
             <Route path="/cart" element={
               <ProtectedRoute userOnly>
                 <Cart />
@@ -79,9 +110,29 @@ function AppContent() {
             } />
             
             {/* Admin Routes */}
-            <Route path="/admin/*" element={
+            <Route path="/admin/dashboard" element={
               <ProtectedRoute adminOnly>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/products" element={
+              <ProtectedRoute adminOnly>
+                <AdminProducts />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/add-product" element={
+              <ProtectedRoute adminOnly>
+                <AddProduct />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/categories" element={
+              <ProtectedRoute adminOnly>
+                <AdminCategories />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/orders" element={
+              <ProtectedRoute adminOnly>
+                <AdminOrders />
               </ProtectedRoute>
             } />
           </Routes>
