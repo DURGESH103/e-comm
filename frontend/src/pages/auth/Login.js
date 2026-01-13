@@ -17,20 +17,20 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const { isLoading, isAuthenticated, error, user } = useSelector((state) => state.auth);
+  const { isLoading, isAuthenticated, error, role } = useSelector((state) => state.auth);
 
   const from = location.state?.from?.pathname || '/';
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && role) {
       // Role-based redirect
-      if (user.role === 'admin') {
+      if (role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } else {
         navigate(from, { replace: true });
       }
     }
-  }, [isAuthenticated, user, navigate, from]);
+  }, [isAuthenticated, role, navigate, from]);
 
   useEffect(() => {
     if (error) {

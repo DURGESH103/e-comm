@@ -8,6 +8,7 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.user.role);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);
@@ -21,6 +22,7 @@ export const registerUser = createAsyncThunk(
     try {
       const response = await api.post('/auth/register', { name, email, password, role, adminKey });
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.user.role);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data.message);
@@ -43,6 +45,7 @@ export const loadUser = createAsyncThunk(
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
+  role: localStorage.getItem('role'),
   isLoading: false,
   isAuthenticated: false,
   error: null,
@@ -54,8 +57,10 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       localStorage.removeItem('token');
+      localStorage.removeItem('role');
       state.user = null;
       state.token = null;
+      state.role = null;
       state.isAuthenticated = false;
     },
     clearError: (state) => {
@@ -74,6 +79,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        state.role = action.payload.user.role;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -89,6 +95,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        state.role = action.payload.user.role;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -98,12 +105,15 @@ const authSlice = createSlice({
       .addCase(loadUser.fulfilled, (state, action) => {
         state.isAuthenticated = true;
         state.user = action.payload.user;
+        state.role = action.payload.user.role;
       })
       .addCase(loadUser.rejected, (state) => {
         state.user = null;
         state.token = null;
+        state.role = null;
         state.isAuthenticated = false;
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
       });
   },
 });

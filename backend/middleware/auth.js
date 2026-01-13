@@ -17,6 +17,7 @@ const auth = async (req, res, next) => {
     }
 
     req.user = user;
+    req.userRole = decoded.role; // Add role from JWT
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
@@ -24,11 +25,19 @@ const auth = async (req, res, next) => {
 };
 
 const adminAuth = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (req.userRole === 'admin') {
     next();
   } else {
     res.status(403).json({ message: 'Admin access required' });
   }
 };
 
-module.exports = { auth, adminAuth };
+const userAuth = (req, res, next) => {
+  if (req.userRole === 'user') {
+    next();
+  } else {
+    res.status(403).json({ message: 'User access required' });
+  }
+};
+
+module.exports = { auth, adminAuth, userAuth };

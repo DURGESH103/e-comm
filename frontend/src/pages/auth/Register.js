@@ -21,18 +21,18 @@ const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
-  const { isLoading, isAuthenticated, error, user } = useSelector((state) => state.auth);
+  const { isLoading, isAuthenticated, error, role } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && role) {
       // Role-based redirect
-      if (user.role === 'admin') {
+      if (role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } else {
         navigate('/', { replace: true });
       }
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, role, navigate]);
 
   useEffect(() => {
     if (error) {

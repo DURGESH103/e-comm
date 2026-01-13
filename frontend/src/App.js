@@ -46,34 +46,34 @@ function AppContent() {
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id" element={<ProductDetail />} />
             
-            {/* Protected Routes */}
+            {/* User Protected Routes */}
             <Route path="/cart" element={
-              <ProtectedRoute>
+              <ProtectedRoute userOnly>
                 <Cart />
               </ProtectedRoute>
             } />
             <Route path="/checkout" element={
-              <ProtectedRoute>
+              <ProtectedRoute userOnly>
                 <Checkout />
               </ProtectedRoute>
             } />
             <Route path="/orders" element={
-              <ProtectedRoute>
+              <ProtectedRoute userOnly>
                 <Orders />
               </ProtectedRoute>
             } />
             <Route path="/orders/:id" element={
-              <ProtectedRoute>
+              <ProtectedRoute userOnly>
                 <OrderDetail />
               </ProtectedRoute>
             } />
             <Route path="/wishlist" element={
-              <ProtectedRoute>
+              <ProtectedRoute userOnly>
                 <Wishlist />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={
-              <ProtectedRoute>
+              <ProtectedRoute userOnly>
                 <Profile />
               </ProtectedRoute>
             } />
@@ -92,11 +92,7 @@ function AppContent() {
           position="top-right"
           autoClose={3000}
           hideProgressBar={false}
-          newestOnTop={false}
           closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
           pauseOnHover
         />
       </div>

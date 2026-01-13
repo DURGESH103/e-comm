@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const ProtectedRoute = ({ children, adminOnly = false }) => {
+const ProtectedRoute = ({ children, adminOnly = false, userOnly = false }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const location = useLocation();
 
@@ -12,6 +12,10 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
   if (adminOnly && user?.role !== 'admin') {
     return <Navigate to="/" replace />;
+  }
+
+  if (userOnly && user?.role !== 'user') {
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return children;

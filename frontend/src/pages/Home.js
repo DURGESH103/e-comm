@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, fetchCategories } from '../store/slices/productSlice';
-import ProductCard from '../components/features/product/ProductCard';
+import ProductCard from '../components/product/ProductCard';
 import Card from '../components/ui/cards/Card';
 import Button from '../components/ui/buttons/Button';
 import Badge from '../components/ui/feedback/Badge';
