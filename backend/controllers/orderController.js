@@ -63,7 +63,13 @@ const getOrders = async (req, res) => {
       .populate('items.product')
       .sort({ createdAt: -1 });
 
-    res.json({ success: true, orders });
+    // Filter out items with null products
+    const cleanedOrders = orders.map(order => ({
+      ...order.toObject(),
+      items: order.items.filter(item => item.product != null)
+    }));
+
+    res.json({ success: true, orders: cleanedOrders });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -80,7 +86,13 @@ const getOrder = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    res.json({ success: true, order });
+    // Filter out items with null products
+    const cleanedOrder = {
+      ...order.toObject(),
+      items: order.items.filter(item => item.product != null)
+    };
+
+    res.json({ success: true, order: cleanedOrder });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

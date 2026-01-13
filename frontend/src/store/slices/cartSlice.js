@@ -75,11 +75,16 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     calculateTotals: (state) => {
-      state.totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
-      state.totalAmount = state.items.reduce(
+      // Filter out items with null/undefined products
+      const validItems = state.items.filter(item => item.product && item.product.price != null);
+      
+      state.totalItems = validItems.reduce((total, item) => total + item.quantity, 0);
+      state.totalAmount = validItems.reduce(
         (total, item) => total + (item.product.price * item.quantity),
         0
       );
+      
+      // DON'T modify state.items here - it causes infinite loops
     },
   },
   extraReducers: (builder) => {
@@ -91,7 +96,9 @@ const cartSlice = createSlice({
       })
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = action.payload.cart.items || [];
+        // Filter out items with null products immediately
+        const items = action.payload.cart.items || [];
+        state.items = items.filter(item => item.product && item.product.price != null);
       })
       .addCase(fetchCart.rejected, (state, action) => {
         state.isLoading = false;
@@ -99,15 +106,18 @@ const cartSlice = createSlice({
       })
       // Add to Cart
       .addCase(addToCart.fulfilled, (state, action) => {
-        state.items = action.payload.cart.items;
+        const items = action.payload.cart.items || [];
+        state.items = items.filter(item => item.product && item.product.price != null);
       })
       // Update Cart Item
       .addCase(updateCartItem.fulfilled, (state, action) => {
-        state.items = action.payload.cart.items;
+        const items = action.payload.cart.items || [];
+        state.items = items.filter(item => item.product && item.product.price != null);
       })
       // Remove from Cart
       .addCase(removeFromCart.fulfilled, (state, action) => {
-        state.items = action.payload.cart.items;
+        const items = action.payload.cart.items || [];
+        state.items = items.filter(item => item.product && item.product.price != null);
       })
       // Clear Cart
       .addCase(clearCart.fulfilled, (state) => {

@@ -7,6 +7,7 @@ const getProducts = async (req, res) => {
       page = 1, 
       limit = 12, 
       category, 
+      subCategory,
       search, 
       minPrice, 
       maxPrice, 
@@ -14,9 +15,12 @@ const getProducts = async (req, res) => {
       sortOrder = 'desc' 
     } = req.query;
 
+    console.log(`🔍 Product query: category=${category}, subCategory=${subCategory}`);
+
     const query = {};
 
     if (category) query.category = category;
+    if (subCategory) query.subCategory = subCategory;
     if (search) query.$text = { $search: search };
     if (minPrice || maxPrice) {
       query.price = {};
@@ -28,12 +32,13 @@ const getProducts = async (req, res) => {
     sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
     const products = await Product.find(query)
-      .populate('category', 'name')
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
     const total = await Product.countDocuments(query);
+
+    console.log(`✅ Found ${products.length} products (${total} total)`);
 
     res.json({
       success: true,
@@ -45,13 +50,14 @@ const getProducts = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('❌ Error fetching products:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 const getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category', 'name');
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -100,9 +106,28 @@ const deleteProduct = async (req, res) => {
 
 const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ isActive: true }).select('name');
-    const categoryNames = categories.map(cat => cat.name);
-    res.json({ success: true, categories: categoryNames });
+    const categories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Beauty', 'Toys'];
+    res.json({ success: true, categories });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const getSubCategories = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const subCategoryMap = {
+      'Clothing': ['Men', 'Women', 'Kids'],
+      'Electronics': ['Mobile', 'Laptop', 'Audio'],
+      'Books': ['Fiction', 'Non-Fiction', 'Educational'],
+      'Home': ['Kitchen', 'Furniture', 'Decor'],
+      'Sports': ['Fitness', 'Outdoor', 'Team Sports'],
+      'Beauty': ['Skincare', 'Makeup', 'Haircare'],
+      'Toys': ['Educational', 'Action', 'Board Games']
+    };
+    
+    const subCategories = subCategoryMap[category] || [];
+    res.json({ success: true, subCategories });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -114,5 +139,6 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
-  getCategories
+  getCategories,
+  getSubCategories
 };

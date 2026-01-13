@@ -7,7 +7,17 @@ const getCart = async (req, res) => {
     if (!cart) {
       return res.json({ success: true, cart: { items: [] } });
     }
-    res.json({ success: true, cart });
+    
+    // Filter out items with null products (deleted products)
+    const validItems = cart.items.filter(item => item.product != null);
+    
+    // Update cart if invalid items were found
+    if (validItems.length !== cart.items.length) {
+      cart.items = validItems;
+      await cart.save();
+    }
+    
+    res.json({ success: true, cart: { ...cart.toObject(), items: validItems } });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -44,6 +54,10 @@ const addToCart = async (req, res) => {
 
     await cart.save();
     await cart.populate('items.product');
+    
+    // Filter out items with null products before sending response
+    const validItems = cart.items.filter(item => item.product != null);
+    cart.items = validItems;
 
     res.json({ success: true, cart });
   } catch (error) {
@@ -78,6 +92,10 @@ const updateCartItem = async (req, res) => {
 
     await cart.save();
     await cart.populate('items.product');
+    
+    // Filter out items with null products before sending response
+    const validItems = cart.items.filter(item => item.product != null);
+    cart.items = validItems;
 
     res.json({ success: true, cart });
   } catch (error) {
@@ -100,6 +118,10 @@ const removeFromCart = async (req, res) => {
 
     await cart.save();
     await cart.populate('items.product');
+    
+    // Filter out items with null products before sending response
+    const validItems = cart.items.filter(item => item.product != null);
+    cart.items = validItems;
 
     res.json({ success: true, cart });
   } catch (error) {

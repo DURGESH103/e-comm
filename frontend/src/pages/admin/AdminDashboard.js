@@ -15,21 +15,17 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     dispatch(fetchProducts());
-    fetchStats();
   }, [dispatch]);
 
-  const fetchStats = async () => {
-    try {
-      // Mock stats - in real app, these would come from API
+  useEffect(() => {
+    if (products.length > 0) {
       setStats({
         totalProducts: products.length,
         totalOrders: 45,
         totalRevenue: 125000
       });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
     }
-  };
+  }, [products]);
 
   return (
     <div className="p-6">
@@ -54,13 +50,20 @@ const AdminDashboard = () => {
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Link
             to="/admin/products"
             className="bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700 transition-colors"
           >
             <div className="text-2xl mb-2">📦</div>
             <div>Manage Products</div>
+          </Link>
+          <Link
+            to="/admin/clothing"
+            className="bg-indigo-600 text-white p-4 rounded-lg text-center hover:bg-indigo-700 transition-colors"
+          >
+            <div className="text-2xl mb-2">👕</div>
+            <div>Clothing Products</div>
           </Link>
           <Link
             to="/admin/add-product"
@@ -110,9 +113,9 @@ const AdminDashboard = () => {
                     />
                     {product.name}
                   </td>
-                  <td className="p-3">₹{product.finalPrice}</td>
+                  <td className="p-3">₹{product.finalPrice || product.price}</td>
                   <td className="p-3">{product.stock}</td>
-                  <td className="p-3">{product.category?.name}</td>
+                  <td className="p-3">{product.category}</td>
                 </tr>
               ))}
             </tbody>

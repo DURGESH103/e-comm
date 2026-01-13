@@ -53,12 +53,18 @@ const Cart = () => {
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md">
-            {items.map((item) => (
+            {items.map((item) => {
+              // Safety check - skip items with null products
+              if (!item.product || !item.product.price) {
+                return null;
+              }
+              
+              return (
               <div key={item.product._id} className="p-4 sm:p-6 border-b border-gray-200 last:border-b-0">
                 <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   <img
-                    src={item.product.images[0]}
-                    alt={item.product.name}
+                    src={item.product.images?.[0] || '/placeholder.jpg'}
+                    alt={item.product.name || 'Product'}
                     className="w-20 h-20 object-cover rounded-md mx-auto sm:mx-0"
                   />
 
@@ -67,9 +73,9 @@ const Cart = () => {
                       to={`/products/${item.product._id}`}
                       className="text-lg font-semibold text-gray-900 hover:text-primary-600 block"
                     >
-                      {item.product.name}
+                      {item.product.name || 'Unknown Product'}
                     </Link>
-                    <p className="text-gray-600 mt-1">₹{item.product.price.toLocaleString()}</p>
+                    <p className="text-gray-600 mt-1">₹{(item.product.price || 0).toLocaleString()}</p>
                   </div>
 
                   <div className="flex items-center justify-center sm:justify-start space-x-3">
@@ -90,7 +96,7 @@ const Cart = () => {
 
                   <div className="text-center sm:text-right">
                     <p className="text-lg font-semibold">
-                      ₹{(item.product.price * item.quantity).toLocaleString()}
+                      ₹{((item.product.price || 0) * item.quantity).toLocaleString()}
                     </p>
                     <button
                       onClick={() => handleRemoveItem(item.product._id)}
@@ -101,7 +107,8 @@ const Cart = () => {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         

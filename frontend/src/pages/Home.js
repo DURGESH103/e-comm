@@ -226,7 +226,7 @@ const Home = () => {
             {categories.map((category) => (
               <Link
                 key={category}
-                to={`/products?category=${category}`}
+                to={category === 'Clothing' ? '/clothing' : `/category/${category}`}
                 className="group"
               >
                 <Card hover className="text-center p-6 group-hover:border-indigo-200 transition-all duration-300">

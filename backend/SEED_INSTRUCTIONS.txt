@@ -1,0 +1,5 @@
+To run the seed script, add this to your backend package.json scripts:
+
+"seed-products": "node seedProducts.js"
+
+Then run: npm run seed-products

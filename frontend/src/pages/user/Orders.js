@@ -75,20 +75,27 @@ const Orders = () => {
               {/* Order Items */}
               <div className="border-t border-gray-200 pt-4">
                 <div className="space-y-3">
-                  {order.items.slice(0, 2).map((item) => (
+                  {order.items.slice(0, 2).map((item) => {
+                    // Safety check - skip items with null products
+                    if (!item.product || !item.product.images) {
+                      return null;
+                    }
+                    
+                    return (
                     <div key={item.product._id} className="flex items-center space-x-4">
                       <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
+                        src={item.product.images[0] || '/placeholder.jpg'}
+                        alt={item.product.name || 'Product'}
                         className="w-16 h-16 object-cover rounded-md"
                       />
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{item.product.name}</h4>
+                        <h4 className="font-medium text-gray-900">{item.product.name || 'Unknown Product'}</h4>
                         <p className="text-gray-600">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-semibold">₹{(item.price * item.quantity).toLocaleString()}</p>
+                      <p className="font-semibold">₹{((item.price || 0) * item.quantity).toLocaleString()}</p>
                     </div>
-                  ))}
+                    );
+                  })}
                   
                   {order.items.length > 2 && (
                     <p className="text-gray-600 text-sm">

@@ -33,13 +33,42 @@ const productSchema = new mongoose.Schema({
     required: true
   }],
   category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
-    required: true
+    type: String,
+    required: true,
+    enum: ['Clothing', 'Electronics', 'Books', 'Home', 'Sports', 'Beauty', 'Toys'],
+    trim: true
   },
   subCategory: {
     type: String,
-    trim: true
+    required: true,
+    trim: true,
+    validate: {
+      validator: function(value) {
+        if (this.category === 'Clothing') {
+          return ['Men', 'Women', 'Kids'].includes(value);
+        }
+        if (this.category === 'Electronics') {
+          return ['Mobile', 'Laptop', 'Audio'].includes(value);
+        }
+        if (this.category === 'Books') {
+          return ['Fiction', 'Non-Fiction', 'Educational'].includes(value);
+        }
+        if (this.category === 'Home') {
+          return ['Kitchen', 'Furniture', 'Decor'].includes(value);
+        }
+        if (this.category === 'Sports') {
+          return ['Fitness', 'Outdoor', 'Team Sports'].includes(value);
+        }
+        if (this.category === 'Beauty') {
+          return ['Skincare', 'Makeup', 'Haircare'].includes(value);
+        }
+        if (this.category === 'Toys') {
+          return ['Educational', 'Action', 'Board Games'].includes(value);
+        }
+        return false;
+      },
+      message: 'Invalid subCategory for the selected category'
+    }
   },
   tags: [{
     type: String,
@@ -71,9 +100,38 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save middleware to calculate finalPrice
+// Pre-save middleware to calculate finalPrice and enforce clothing rules
 productSchema.pre('save', function(next) {
   this.finalPrice = this.price - (this.price * this.discount / 100);
+  
+  // Enforce clothing category rules
+  if (this.category === 'Clothing') {
+    if (!['Men', 'Women', 'Kids'].includes(this.subCategory)) {
+      return next(new Error('Invalid subCategory for Clothing. Must be Men, Women, or Kids'));
+    }
+  }
+  
+  // Normalize category and subCategory values
+  if (this.category) {
+    this.category = this.category.charAt(0).toUpperCase() + this.category.slice(1).toLowerCase();
+  }
+  if (this.subCategory) {
+    this.subCategory = this.subCategory.charAt(0).toUpperCase() + this.subCategory.slice(1).toLowerCase();
+  }
+  
+  next();
+});
+
+// Pre-update middleware
+productSchema.pre('findOneAndUpdate', function(next) {
+  const update = this.getUpdate();
+  
+  if (update.category === 'Clothing' && update.subCategory) {
+    if (!['Men', 'Women', 'Kids'].includes(update.subCategory)) {
+      return next(new Error('Invalid subCategory for Clothing. Must be Men, Women, or Kids'));
+    }
+  }
+  
   next();
 });
 

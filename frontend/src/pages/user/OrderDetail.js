@@ -67,11 +67,17 @@ const OrderDetail = () => {
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold mb-4">Order Items</h2>
           <div className="space-y-4">
-            {order.items.map((item) => (
+            {order.items.map((item) => {
+              // Safety check - skip items with null products
+              if (!item.product || !item.product.images) {
+                return null;
+              }
+              
+              return (
               <div key={item.product._id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
                 <img
-                  src={item.product.images[0]}
-                  alt={item.product.name}
+                  src={item.product.images[0] || '/placeholder.jpg'}
+                  alt={item.product.name || 'Product'}
                   className="w-20 h-20 object-cover rounded-md"
                 />
                 <div className="flex-1">
@@ -79,21 +85,22 @@ const OrderDetail = () => {
                     to={`/products/${item.product._id}`}
                     className="text-lg font-medium text-gray-900 hover:text-primary-600"
                   >
-                    {item.product.name}
+                    {item.product.name || 'Unknown Product'}
                   </Link>
-                  <p className="text-gray-600 mt-1">{item.product.description}</p>
+                  <p className="text-gray-600 mt-1">{item.product.description || 'No description'}</p>
                   <div className="flex items-center mt-2 space-x-4">
                     <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
-                    <span className="text-sm text-gray-600">Price: ₹{item.price.toLocaleString()}</span>
+                    <span className="text-sm text-gray-600">Price: ₹{(item.price || 0).toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-semibold">
-                    ₹{(item.price * item.quantity).toLocaleString()}
+                    ₹{((item.price || 0) * item.quantity).toLocaleString()}
                   </p>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

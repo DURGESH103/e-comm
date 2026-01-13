@@ -24,6 +24,20 @@ const AddProduct = () => {
     isFeatured: false
   });
 
+  const categoryOptions = [
+    'Clothing', 'Electronics', 'Books', 'Home', 'Sports', 'Beauty', 'Toys'
+  ];
+
+  const subCategoryOptions = {
+    'Clothing': ['Men', 'Women', 'Kids'],
+    'Electronics': ['Mobile', 'Laptop', 'Audio'],
+    'Books': ['Fiction', 'Non-Fiction', 'Educational'],
+    'Home': ['Kitchen', 'Furniture', 'Decor'],
+    'Sports': ['Fitness', 'Outdoor', 'Team Sports'],
+    'Beauty': ['Skincare', 'Makeup', 'Haircare'],
+    'Toys': ['Educational', 'Action', 'Board Games']
+  };
+
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -32,10 +46,19 @@ const AddProduct = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    if (name === 'category') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        subCategory: '' // Reset subcategory when category changes
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
   const handleImageChange = (index, value) => {
@@ -171,45 +194,39 @@ const AddProduct = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Category</label>
-            {categories.length > 0 ? (
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Select Category</option>
-                {categories.map(cat => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
-                ))}
-              </select>
-            ) : (
-              <div>
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  placeholder="Enter category name"
-                  required
-                  className="w-full p-2 border rounded"
-                />
-                <p className="text-sm text-gray-500 mt-1">No categories found. Enter category name manually.</p>
-              </div>
-            )}
+            <label className="block text-sm font-medium mb-2">Category *</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded"
+            >
+              <option value="">Select Category</option>
+              {categoryOptions.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Sub Category</label>
-            <input
-              type="text"
+            <label className="block text-sm font-medium mb-2">Sub Category *</label>
+            <select
               name="subCategory"
               value={formData.subCategory}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
+              required
+              disabled={!formData.category}
+              className="w-full p-2 border rounded disabled:bg-gray-100"
+            >
+              <option value="">Select Sub Category</option>
+              {formData.category && subCategoryOptions[formData.category]?.map(subCat => (
+                <option key={subCat} value={subCat}>{subCat}</option>
+              ))}
+            </select>
+            {!formData.category && (
+              <p className="text-sm text-gray-500 mt-1">Select a category first</p>
+            )}
           </div>
         </div>
 

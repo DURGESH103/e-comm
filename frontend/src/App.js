@@ -29,6 +29,14 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AddProduct from './pages/admin/AddProduct';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminClothingProducts from './pages/admin/AdminClothingProducts';
+import CreateClothingProduct from './pages/admin/CreateClothingProduct';
+import CategoryPage from './pages/CategoryPage';
+import SubCategoryProducts from './pages/SubCategoryProducts';
+import ClothingPage from './pages/ClothingPage';
+import MenClothingPage from './pages/MenClothingPage';
+import WomenClothingPage from './pages/WomenClothingPage';
+import KidsClothingPage from './pages/KidsClothingPage';
 
 function AppContent() {
   useEffect(() => {
@@ -49,6 +57,12 @@ function AppContent() {
             <Route path="/register" element={<Register />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/clothing" element={<ClothingPage />} />
+            <Route path="/clothing/men" element={<MenClothingPage />} />
+            <Route path="/clothing/women" element={<WomenClothingPage />} />
+            <Route path="/clothing/kids" element={<KidsClothingPage />} />
+            <Route path="/category/:categoryName" element={<CategoryPage />} />
+            <Route path="/category/:categoryName/:subCategoryName" element={<SubCategoryProducts />} />
             
             {/* User Routes */}
             <Route path="/user/home" element={
@@ -133,6 +147,16 @@ function AppContent() {
             <Route path="/admin/orders" element={
               <ProtectedRoute adminOnly>
                 <AdminOrders />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/clothing" element={
+              <ProtectedRoute adminOnly>
+                <AdminClothingProducts />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/clothing/create" element={
+              <ProtectedRoute adminOnly>
+                <CreateClothingProduct />
               </ProtectedRoute>
             } />
           </Routes>
