@@ -168,11 +168,11 @@ const ProductDetail = () => {
           )}
 
           {/* Action Buttons */}
-          <div className="flex space-x-4 mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8">
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors duration-200 ${
+              className={`flex-1 py-4 px-6 rounded-lg font-medium transition-colors duration-200 text-center ${
                 product.stock > 0
                   ? 'bg-primary-600 hover:bg-primary-700 text-white'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -180,10 +180,10 @@ const ProductDetail = () => {
             >
               {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
             </button>
-            
+
             <button
               onClick={handleWishlistToggle}
-              className={`px-6 py-3 rounded-lg border transition-colors duration-200 ${
+              className={`px-6 py-4 rounded-lg border transition-colors duration-200 flex items-center justify-center ${
                 isInWishlist
                   ? 'border-red-500 text-red-500 hover:bg-red-50'
                   : 'border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -202,6 +202,9 @@ const ProductDetail = () => {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
+              <span className="ml-2 hidden sm:inline">
+                {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+              </span>
             </button>
           </div>
 

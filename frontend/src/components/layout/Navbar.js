@@ -42,7 +42,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg shadow-slate-900/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -82,14 +82,14 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 {/* Wishlist */}
-                <Link to="/wishlist" className="relative p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200">
+                <Link to="/wishlist" className="relative p-2 text-slate-600 hover:text-indigo-600 hover:scale-110 transition-all duration-200">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </Link>
 
                 {/* Cart */}
-                <Link to="/cart" className="relative p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200">
+                <Link to="/cart" className="relative p-2 text-slate-600 hover:text-indigo-600 hover:scale-110 transition-all duration-200">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                   </svg>
@@ -116,8 +116,9 @@ const Navbar = () => {
                     </svg>
                   </button>
                   
-                  {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-slate-200 py-2 z-50">
+                  <div className={`absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-slate-200 py-2 z-50 transition-all duration-200 ease-out ${
+                    isProfileOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
+                  }`}>
                       <div className="px-4 py-3 border-b border-slate-100">
                         <p className="text-sm font-medium text-slate-900">{user?.name}</p>
                         <p className="text-sm text-slate-500">{user?.email}</p>
@@ -152,8 +153,7 @@ const Navbar = () => {
                       >
                         Sign Out
                       </button>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </>
             ) : (
@@ -171,7 +171,7 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-xl hover:bg-slate-50 transition-colors duration-200"
+            className="md:hidden p-3 rounded-xl hover:bg-slate-50 transition-colors duration-200"
           >
             <svg className="h-6 w-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isMenuOpen ? (
@@ -202,8 +202,9 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-slate-200 py-4 space-y-2">
+        <div className={`md:hidden border-t border-slate-200 py-4 space-y-2 transition-all duration-300 ease-in-out ${
+          isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
+        }`}>
             <Link
               to="/products"
               className="block px-3 py-2 text-slate-700 hover:bg-slate-50 rounded-xl transition-colors duration-200"
@@ -280,8 +281,7 @@ const Navbar = () => {
                 </Link>
               </div>
             )}
-          </div>
-        )}
+        </div>
       </div>
     </nav>
   );

@@ -54,47 +54,47 @@ const Cart = () => {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-md">
             {items.map((item) => (
-              <div key={item.product._id} className="p-6 border-b border-gray-200 last:border-b-0">
-                <div className="flex items-center space-x-4">
+              <div key={item.product._id} className="p-4 sm:p-6 border-b border-gray-200 last:border-b-0">
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   <img
                     src={item.product.images[0]}
                     alt={item.product.name}
-                    className="w-20 h-20 object-cover rounded-md"
+                    className="w-20 h-20 object-cover rounded-md mx-auto sm:mx-0"
                   />
-                  
-                  <div className="flex-1">
+
+                  <div className="flex-1 text-center sm:text-left">
                     <Link
                       to={`/products/${item.product._id}`}
-                      className="text-lg font-semibold text-gray-900 hover:text-primary-600"
+                      className="text-lg font-semibold text-gray-900 hover:text-primary-600 block"
                     >
                       {item.product.name}
                     </Link>
                     <p className="text-gray-600 mt-1">₹{item.product.price.toLocaleString()}</p>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
+
+                  <div className="flex items-center justify-center sm:justify-start space-x-3">
                     <button
                       onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)}
-                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                      className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
                     >
                       -
                     </button>
-                    <span className="w-8 text-center">{item.quantity}</span>
+                    <span className="w-12 text-center font-medium">{item.quantity}</span>
                     <button
                       onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
-                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                      className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
                     >
                       +
                     </button>
                   </div>
-                  
-                  <div className="text-right">
+
+                  <div className="text-center sm:text-right">
                     <p className="text-lg font-semibold">
                       ₹{(item.product.price * item.quantity).toLocaleString()}
                     </p>
                     <button
                       onClick={() => handleRemoveItem(item.product._id)}
-                      className="text-red-600 hover:text-red-700 text-sm mt-1"
+                      className="text-red-600 hover:text-red-700 text-sm mt-1 transition-colors"
                     >
                       Remove
                     </button>
