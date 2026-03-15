@@ -7,24 +7,26 @@ const {
   getProducts,
   getCategories,
   getOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  getDashboardStats,
 } = require('../controllers/adminController');
 const { auth, adminAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Admin Product Routes
-router.post('/products', auth, adminAuth, addProduct);
-router.put('/products/:id', auth, adminAuth, updateProduct);
-router.delete('/products/:id', auth, adminAuth, deleteProduct);
-router.get('/products', auth, adminAuth, getProducts);
+router.use(auth, adminAuth);
 
-// Admin Category Routes
-router.post('/categories', auth, adminAuth, addCategory);
-router.get('/categories', auth, adminAuth, getCategories);
+router.get('/dashboard/stats', getDashboardStats);
 
-// Admin Order Routes
-router.get('/orders', auth, adminAuth, getOrders);
-router.put('/orders/:id', auth, adminAuth, updateOrderStatus);
+router.post('/products', addProduct);
+router.put('/products/:id', updateProduct);
+router.delete('/products/:id', deleteProduct);
+router.get('/products', getProducts);
+
+router.post('/categories', addCategory);
+router.get('/categories', getCategories);
+
+router.get('/orders', getOrders);
+router.put('/orders/:id', updateOrderStatus);
 
 module.exports = router;

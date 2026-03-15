@@ -1,17 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../services/api';
+import { connectSocket, disconnectSocket } from '../../services/socket';
 
-// Async thunks
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('role', response.data.user.role);
-      return response.data;
+      const { data } = await api.post('/auth/login', { email, password });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      connectSocket(data.user.id);
+      return data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
@@ -20,12 +21,13 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ name, email, password, role, adminKey }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/auth/register', { name, email, password, role, adminKey });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('role', response.data.user.role);
-      return response.data;
+      const { data } = await api.post('/auth/register', { name, email, password, role, adminKey });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      connectSocket(data.user.id);
+      return data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
 );
@@ -34,10 +36,11 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/auth/profile');
-      return response.data;
+      const { data } = await api.get('/auth/profile');
+      connectSocket(data.user.id);
+      return data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || 'Session expired');
     }
   }
 );
@@ -45,8 +48,9 @@ export const loadUser = createAsyncThunk(
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
-  role: localStorage.getItem('role'),
   isLoading: false,
+  // If a token exists in storage, start as "checking" so ProtectedRoute waits
+  isCheckingAuth: !!localStorage.getItem('token'),
   isAuthenticated: false,
   error: null,
 };
@@ -57,11 +61,13 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       localStorage.removeItem('token');
-      localStorage.removeItem('role');
+      localStorage.removeItem('refreshToken');
+      disconnectSocket();
       state.user = null;
       state.token = null;
-      state.role = null;
       state.isAuthenticated = false;
+      state.isCheckingAuth = false;
+      state.error = null;
     },
     clearError: (state) => {
       state.error = null;
@@ -69,51 +75,43 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Login
-      .addCase(loginUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
+      .addCase(loginUser.pending, (state) => { state.isLoading = true; state.error = null; })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        state.role = action.payload.user.role;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Register
-      .addCase(registerUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
+      .addCase(registerUser.pending, (state) => { state.isLoading = true; state.error = null; })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        state.role = action.payload.user.role;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Load User
+      .addCase(loadUser.pending, (state) => {
+        state.isCheckingAuth = true;
+      })
       .addCase(loadUser.fulfilled, (state, action) => {
+        state.isCheckingAuth = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.role = action.payload.user.role;
       })
       .addCase(loadUser.rejected, (state) => {
+        state.isCheckingAuth = false;
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         state.user = null;
         state.token = null;
-        state.role = null;
         state.isAuthenticated = false;
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
       });
   },
 });

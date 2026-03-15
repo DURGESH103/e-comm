@@ -1,43 +1,47 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const auth = async (req, res, next) => {
+/**
+ * Lightweight auth — decodes JWT without a DB round-trip.
+ * req.user is populated with { id, role } from the token payload.
+ * Use `requireFullUser` after this when you need the full user document.
+ */
+const auth = (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      return res.status(401).json({ message: 'No token, authorization denied' });
-    }
+    if (!token) return res.status(401).json({ message: 'No token, authorization denied' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
-    
-    if (!user) {
-      return res.status(401).json({ message: 'Token is not valid' });
-    }
-
-    req.user = user;
-    req.userRole = decoded.role; // Add role from JWT
+    req.user = { id: decoded.id, role: decoded.role };
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({ message: 'Token is not valid' });
   }
 };
 
-const adminAuth = (req, res, next) => {
-  if (req.userRole === 'admin') {
+/**
+ * Fetches the full user document from DB.
+ * Use only on routes that genuinely need user profile data.
+ */
+const requireFullUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password').lean();
+    if (!user) return res.status(401).json({ message: 'User not found' });
+    req.user = user;
     next();
-  } else {
-    res.status(403).json({ message: 'Admin access required' });
+  } catch {
+    res.status(500).json({ message: 'Server error' });
   }
+};
+
+const adminAuth = (req, res, next) => {
+  if (req.user?.role === 'admin') return next();
+  res.status(403).json({ message: 'Admin access required' });
 };
 
 const userAuth = (req, res, next) => {
-  if (req.userRole === 'user') {
-    next();
-  } else {
-    res.status(403).json({ message: 'User access required' });
-  }
+  if (req.user?.role === 'user') return next();
+  res.status(403).json({ message: 'User access required' });
 };
 
-module.exports = { auth, adminAuth, userAuth };
+module.exports = { auth, adminAuth, userAuth, requireFullUser };
