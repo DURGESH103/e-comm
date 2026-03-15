@@ -9,6 +9,10 @@ const {
   getOrders,
   updateOrderStatus,
   getDashboardStats,
+  getUsers,
+  getUserById,
+  toggleBlockUser,
+  deleteUser,
 } = require('../controllers/adminController');
 const { auth, adminAuth } = require('../middleware/auth');
 
@@ -28,5 +32,11 @@ router.get('/categories', getCategories);
 
 router.get('/orders', getOrders);
 router.put('/orders/:id', updateOrderStatus);
+
+// User management
+router.get('/users', getUsers);
+router.get('/users/:id', getUserById);
+router.patch('/users/:id/block', toggleBlockUser);
+router.delete('/users/:id', deleteUser);
 
 module.exports = router;

@@ -97,6 +97,7 @@ const Header = () => {
   const { isAuthenticated, user } = useSelector((s) => s.auth);
   const { items, totalItems }     = useSelector((s) => s.cart);
   const { categories }            = useSelector((s) => s.products);
+  const isAdmin = user?.role === 'admin';
 
   /* scroll detection */
   const handleScroll = useCallback(() => {

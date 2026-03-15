@@ -31,6 +31,7 @@ import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminClothingProducts from './pages/admin/AdminClothingProducts';
 import CreateClothingProduct from './pages/admin/CreateClothingProduct';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
 import CategoryPage from './pages/CategoryPage';
 import ForYouPage from './pages/ForYouPage';
 import ClothingPage from './pages/ClothingPage';
@@ -112,6 +113,7 @@ function AppContent() {
             <Route path="/admin/orders" element={<ProtectedRoute adminOnly><AdminOrders /></ProtectedRoute>} />
             <Route path="/admin/clothing" element={<ProtectedRoute adminOnly><AdminClothingProducts /></ProtectedRoute>} />
             <Route path="/admin/clothing/create" element={<ProtectedRoute adminOnly><CreateClothingProduct /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute adminOnly><AdminUsersPage /></ProtectedRoute>} />
           </Routes>
         </main>
         <Footer />

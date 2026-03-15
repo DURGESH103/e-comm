@@ -55,6 +55,12 @@ const login = async (req, res) => {
     if (!user || !(await user.comparePassword(password)))
       return res.status(401).json({ message: 'Invalid credentials' });
 
+    if (user.isBlocked)
+      return res.status(403).json({ message: 'Your account has been blocked. Please contact support.' });
+
+    // Update lastLogin without triggering full save hooks
+    await User.updateOne({ _id: user._id }, { lastLogin: new Date() });
+
     const accessToken = generateAccessToken(user._id, user.role);
     const refreshToken = generateRefreshToken(user._id);
 

@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Order = require('../models/Order');
+const User = require('../models/User');
 const cache = require('../config/cache');
 const socketManager = require('../config/socket');
 
@@ -207,6 +208,101 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// ── User Management ──────────────────────────────────────────────────────────
+
+const getUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 15, search, role, status } = req.query;
+    const query = {};
+
+    if (role && ['user', 'admin'].includes(role)) query.role = role;
+    if (status === 'blocked')  query.isBlocked = true;
+    if (status === 'active')   query.isBlocked = false;
+    if (search) {
+      const re = new RegExp(search.trim(), 'i');
+      query.$or = [{ name: re }, { email: re }];
+    }
+
+    const skip  = (Number(page) - 1) * Number(limit);
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .select('-password -addresses')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit))
+        .lean(),
+      User.countDocuments(query),
+    ]);
+
+    res.json({
+      success: true,
+      users,
+      pagination: {
+        current: Number(page),
+        pages: Math.ceil(total / Number(limit)),
+        total,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .lean();
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Attach order summary
+    const [orderCount, totalSpent] = await Promise.all([
+      Order.countDocuments({ user: user._id }),
+      Order.aggregate([
+        { $match: { user: user._id, status: 'Delivered' } },
+        { $group: { _id: null, total: { $sum: '$totalAmount' } } },
+      ]).then((r) => r[0]?.total ?? 0),
+    ]);
+
+    res.json({ success: true, user: { ...user, orderCount, totalSpent } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const toggleBlockUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('role isBlocked name');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (user.role === 'admin') return res.status(403).json({ success: false, message: 'Cannot block an admin' });
+
+    user.isBlocked = !user.isBlocked;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `User ${user.isBlocked ? 'blocked' : 'unblocked'} successfully`,
+      isBlocked: user.isBlocked,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('role');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (user.role === 'admin') return res.status(403).json({ success: false, message: 'Cannot delete an admin' });
+    if (req.params.id === req.user.id) return res.status(403).json({ success: false, message: 'Cannot delete yourself' });
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 module.exports = {
   addProduct,
   updateProduct,
@@ -217,4 +313,9 @@ module.exports = {
   getOrders,
   updateOrderStatus,
   getDashboardStats,
+  getUsers,
+  getUserById,
+  toggleBlockUser,
+  deleteUser,
 };
+

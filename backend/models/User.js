@@ -31,10 +31,22 @@ const userSchema = new mongoose.Schema({
     state: String,
     pincode: String,
     isDefault: { type: Boolean, default: false }
-  }]
+  }],
+  isBlocked: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+  lastLogin: {
+    type: Date,
+    default: null,
+  },
 }, {
   timestamps: true
 });
+
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1, createdAt: -1 });
 
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();

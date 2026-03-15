@@ -96,13 +96,14 @@ const AdminDashboard = () => {
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-lg font-semibold mb-4 text-gray-800">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {[
             { to: '/admin/products', icon: '📦', label: 'Products', bg: 'bg-blue-600 hover:bg-blue-700' },
             { to: '/admin/clothing', icon: '👕', label: 'Clothing', bg: 'bg-indigo-600 hover:bg-indigo-700' },
             { to: '/admin/add-product', icon: '➕', label: 'Add Product', bg: 'bg-green-600 hover:bg-green-700' },
             { to: '/admin/categories', icon: '🏷️', label: 'Categories', bg: 'bg-purple-600 hover:bg-purple-700' },
             { to: '/admin/orders', icon: '📋', label: 'Orders', bg: 'bg-orange-600 hover:bg-orange-700' },
+            { to: '/admin/users',  icon: '👥', label: 'Users',  bg: 'bg-rose-600 hover:bg-rose-700' },
           ].map(({ to, icon, label, bg }) => (
             <Link
               key={to}
