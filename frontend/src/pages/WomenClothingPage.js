@@ -1,16 +1,15 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchWomenClothing, clearProducts } from '../store/slices/productSlice';
+import { fetchWomenClothing } from '../store/slices/clothingSlice';
 import ProductCard from '../components/product/ProductCard';
 import { ProductCardSkeleton } from '../components/ui/feedback/Skeleton';
 
 const WomenClothingPage = () => {
   const dispatch = useDispatch();
-  const { products, loading } = useSelector((state) => state.products);
+  const { products, loading } = useSelector((state) => state.clothing);
 
   useEffect(() => {
-    dispatch(clearProducts());
     dispatch(fetchWomenClothing());
   }, [dispatch]);
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import { fetchProducts, fetchCategories, setFilters } from '../../store/slices/productSlice';
+import { fetchProducts, fetchCategories } from '../../store/slices/productSlice';
 import ProductCard from '../../components/product/ProductCard';
 import Loading from '../../components/common/Loading';
 
@@ -9,8 +9,16 @@ const Products = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    search: '',
+    category: '',
+    minPrice: '',
+    maxPrice: '',
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  });
   
-  const { products, categories, isLoading, totalPages, currentPage, filters } = useSelector(
+  const { products, categories, loading, pagination } = useSelector(
     (state) => state.products
   );
 
@@ -25,7 +33,7 @@ const Products = () => {
       sortOrder: searchParams.get('sortOrder') || 'desc',
     };
     
-    dispatch(setFilters(urlFilters));
+    setFilters(urlFilters);
     dispatch(fetchCategories());
   }, [dispatch, searchParams]);
 
@@ -45,7 +53,7 @@ const Products = () => {
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
-    dispatch(setFilters(newFilters));
+    setFilters(newFilters);
     
     // Update URL
     const newSearchParams = new URLSearchParams();
@@ -63,7 +71,7 @@ const Products = () => {
     setSearchParams(newSearchParams);
   };
 
-  if (isLoading && products.length === 0) {
+  if (loading && products.length === 0) {
     return <Loading text="Loading products..." />;
   }
 
@@ -181,18 +189,18 @@ const Products = () => {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {pagination.pages > 1 && (
                 <div className="flex justify-center">
                   <nav className="flex space-x-2">
-                    {[...Array(totalPages)].map((_, index) => {
+                    {[...Array(pagination.pages)].map((_, index) => {
                       const page = index + 1;
                       return (
                         <button
                           key={page}
                           onClick={() => handlePageChange(page)}
                           className={`px-3 py-2 rounded-md ${
-                            page === currentPage
-                              ? 'bg-primary-600 text-white'
+                            page === pagination.current
+                              ? 'bg-indigo-600 text-white'
                               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                           }`}
                         >

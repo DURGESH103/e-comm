@@ -1,17 +1,16 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchClothingProducts, clearProducts } from '../store/slices/productSlice';
+import { fetchClothingProducts } from '../store/slices/clothingSlice';
 import ProductCard from '../components/product/ProductCard';
 import { ProductCardSkeleton } from '../components/ui/feedback/Skeleton';
 import Card from '../components/ui/cards/Card';
 
 const ClothingPage = () => {
   const dispatch = useDispatch();
-  const { products, loading } = useSelector((state) => state.products);
+  const { products, loading } = useSelector((state) => state.clothing);
 
   useEffect(() => {
-    dispatch(clearProducts());
     dispatch(fetchClothingProducts());
   }, [dispatch]);
 

@@ -6,27 +6,31 @@ const Order = require('../models/Order');
 const addProduct = async (req, res) => {
   try {
     console.log('Received product data:', req.body);
+    console.log('Category type:', typeof req.body.category);
+    console.log('Category value:', req.body.category);
     
-    let productData = {
-      ...req.body,
+    const productData = {
+      name: req.body.name,
+      description: req.body.description,
+      price: req.body.price,
+      discount: req.body.discount,
+      stock: req.body.stock,
+      category: req.body.category,
+      subCategory: req.body.subCategory,
+      tags: req.body.tags,
+      images: req.body.images,
+      brand: req.body.brand,
+      isFeatured: req.body.isFeatured,
       createdBy: req.user._id
     };
     
-    // If category is a string, try to find or create the category
-    if (typeof productData.category === 'string' && !productData.category.match(/^[0-9a-fA-F]{24}$/)) {
-      let category = await Category.findOne({ name: productData.category });
-      if (!category) {
-        category = await Category.create({
-          name: productData.category,
-          createdBy: req.user._id
-        });
-      }
-      productData.category = category._id;
-    }
+    console.log('Product data before save:', productData);
+    console.log('Category in productData:', productData.category, typeof productData.category);
     
     const product = new Product(productData);
+    console.log('Product after creation:', product.category, typeof product.category);
+    
     await product.save();
-    await product.populate('category', 'name');
     
     res.status(201).json({
       success: true,
@@ -49,7 +53,7 @@ const updateProduct = async (req, res) => {
       req.params.id,
       req.body,
       { new: true, runValidators: true }
-    ).populate('category', 'name');
+    );
     
     if (!product) {
       return res.status(404).json({
@@ -149,7 +153,6 @@ const getProducts = async (req, res) => {
     }
     
     const products = await Product.find(filter)
-      .populate('category', 'name')
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -177,7 +180,6 @@ const getProducts = async (req, res) => {
 const getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
-      .populate('category', 'name')
       .populate('reviews');
     
     if (!product) {
@@ -202,7 +204,16 @@ const getProduct = async (req, res) => {
 // Get All Categories
 const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ isActive: true });
+    // Return hardcoded categories for now to avoid confusion
+    const categories = [
+      { _id: '1', name: 'Clothing', isActive: true },
+      { _id: '2', name: 'Electronics', isActive: true },
+      { _id: '3', name: 'Books', isActive: true },
+      { _id: '4', name: 'Home', isActive: true },
+      { _id: '5', name: 'Sports', isActive: true },
+      { _id: '6', name: 'Beauty', isActive: true },
+      { _id: '7', name: 'Toys', isActive: true }
+    ];
     
     res.json({
       success: true,
