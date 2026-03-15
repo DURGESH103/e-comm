@@ -171,14 +171,14 @@ const OrderDetail = () => {
           
           <div className="flex items-center">
             <div className={`w-4 h-4 rounded-full mr-4 ${
-              ['Confirmed', 'Shipped', 'Delivered'].includes(order.status) 
+              ['Confirmed', 'Processing', 'Shipped', 'Delivered'].includes(order.status) 
                 ? 'bg-green-500' 
                 : 'bg-gray-300'
             }`}></div>
             <div>
               <p className="font-medium">Order Confirmed</p>
               <p className="text-gray-600 text-sm">
-                {['Confirmed', 'Shipped', 'Delivered'].includes(order.status) 
+                {['Confirmed', 'Processing', 'Shipped', 'Delivered'].includes(order.status) 
                   ? 'Confirmed' 
                   : 'Pending confirmation'}
               </p>
