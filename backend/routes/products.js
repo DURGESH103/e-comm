@@ -3,7 +3,8 @@ const {
   getProducts,
   getProduct,
   getCategories,
-  getSubCategories
+  getSubCategories,
+  getProductVariants
 } = require('../controllers/productController');
 
 const router = express.Router();
@@ -13,5 +14,6 @@ router.get('/', getProducts);
 router.get('/categories', getCategories);
 router.get('/categories/:category/subcategories', getSubCategories);
 router.get('/:id', getProduct);
+router.get('/:id/variants', getProductVariants);
 
 module.exports = router;

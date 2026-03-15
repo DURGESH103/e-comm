@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const Profile = () => {
@@ -10,37 +11,9 @@ const Profile = () => {
     phone: '',
   });
 
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      phone: '+91 9876543210',
-      address: '123 Main Street, Apartment 4B',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400001',
-      isDefault: true
-    }
-  ]);
-
   const handleProfileUpdate = (e) => {
     e.preventDefault();
-    // Handle profile update logic here
     console.log('Profile updated:', profileData);
-  };
-
-  const handleAddressAdd = () => {
-    // Handle add new address logic
-    console.log('Add new address');
-  };
-
-  const handleAddressEdit = (addressId) => {
-    // Handle edit address logic
-    console.log('Edit address:', addressId);
-  };
-
-  const handleAddressDelete = (addressId) => {
-    setAddresses(addresses.filter(addr => addr.id !== addressId));
   };
 
   return (
@@ -148,51 +121,20 @@ const Profile = () => {
           )}
 
           {activeTab === 'addresses' && (
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold">Saved Addresses</h2>
-                <button onClick={handleAddressAdd} className="btn-primary">
-                  Add New Address
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                {addresses.map((address) => (
-                  <div key={address.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-2">
-                          <h3 className="font-medium text-gray-900">{address.name}</h3>
-                          {address.isDefault && (
-                            <span className="ml-2 px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-gray-600">{address.phone}</p>
-                        <p className="text-gray-600 mt-1">
-                          {address.address}<br />
-                          {address.city}, {address.state} - {address.pincode}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleAddressEdit(address.id)}
-                          className="text-primary-600 hover:text-primary-700 text-sm"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleAddressDelete(address.id)}
-                          className="text-red-600 hover:text-red-700 text-sm"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="text-center py-12">
+              <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <p className="text-gray-600 mb-4">Manage your saved delivery addresses</p>
+              <Link
+                to="/addresses"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700
+                           text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Go to Address Book
+              </Link>
             </div>
           )}
 

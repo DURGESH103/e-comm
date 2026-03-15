@@ -260,9 +260,10 @@ const Header = () => {
                       ))
                     ) : (
                       [
-                        { to: '/profile', label: 'My Profile', emoji: '👤' },
-                        { to: '/orders',  label: 'My Orders',  emoji: '📦' },
-                        { to: '/wishlist',label: 'Wishlist',   emoji: '❤️' },
+                        { to: '/profile',   label: 'My Profile',  emoji: '👤' },
+                        { to: '/orders',    label: 'My Orders',   emoji: '📦' },
+                        { to: '/addresses', label: 'Addresses',   emoji: '📍' },
+                        { to: '/wishlist',  label: 'Wishlist',    emoji: '❤️' },
                       ].map(({ to, label, emoji }) => (
                         <Link key={to} to={to} onClick={() => setProfileOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors duration-150">
@@ -351,10 +352,11 @@ const Header = () => {
                 ))
               ) : (
                 [
-                  { to: '/profile',  label: 'My Profile',        emoji: '👤' },
-                  { to: '/orders',   label: 'My Orders',          emoji: '📦' },
-                  { to: '/wishlist', label: 'Wishlist',           emoji: '❤️' },
-                  { to: '/cart',     label: `Cart (${totalItems})`, emoji: '🛒' },
+                  { to: '/profile',   label: 'My Profile',        emoji: '👤' },
+                  { to: '/orders',    label: 'My Orders',          emoji: '📦' },
+                  { to: '/addresses', label: 'Addresses',          emoji: '📍' },
+                  { to: '/wishlist',  label: 'Wishlist',           emoji: '❤️' },
+                  { to: '/cart',      label: `Cart (${totalItems})`, emoji: '🛒' },
                 ].map(({ to, label, emoji }) => (
                   <Link key={to} to={to}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors duration-150">

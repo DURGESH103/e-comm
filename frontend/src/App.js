@@ -24,6 +24,7 @@ import Orders from './pages/user/Orders';
 import OrderDetail from './pages/user/OrderDetail';
 import Wishlist from './pages/user/Wishlist';
 import Profile from './pages/user/Profile';
+import AddressBook from './pages/user/AddressBook';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AddProduct from './pages/admin/AddProduct';
@@ -104,6 +105,7 @@ function AppContent() {
             <Route path="/orders/:id" element={<ProtectedRoute userOnly><OrderDetail /></ProtectedRoute>} />
             <Route path="/wishlist" element={<ProtectedRoute userOnly><Wishlist /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute userOnly><Profile /></ProtectedRoute>} />
+            <Route path="/addresses" element={<ProtectedRoute userOnly><AddressBook /></ProtectedRoute>} />
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />

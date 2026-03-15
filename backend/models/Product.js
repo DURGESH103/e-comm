@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+const variantSchema = new mongoose.Schema({
+  attributes: {
+    type: Map,
+    of: String,
+    required: true
+  },
+  price: { type: Number, required: true },
+  originalPrice: { type: Number },
+  stock: { type: Number, required: true, default: 0 },
+  images: [{ type: String }]
+}, { _id: true });
+
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -25,13 +37,13 @@ const productSchema = new mongoose.Schema({
   },
   stock: {
     type: Number,
-    required: true,
     default: 0
   },
   images: [{
-    type: String,
-    required: true
+    type: String
   }],
+  attributes: [{ type: String, trim: true }],
+  variants: [variantSchema],
   category: {
     type: String,
     required: true,
@@ -139,5 +151,6 @@ productSchema.pre('findOneAndUpdate', function(next) {
 productSchema.index({ name: 'text', description: 'text', brand: 'text' });
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ tags: 1 });
+productSchema.index({ 'variants._id': 1 });
 
 module.exports = mongoose.model('Product', productSchema);

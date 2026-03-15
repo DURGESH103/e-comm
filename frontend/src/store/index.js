@@ -7,6 +7,7 @@ import clothingSlice from './slices/clothingSlice';
 import cartSlice from './slices/cartSlice';
 import wishlistSlice from './slices/wishlistSlice';
 import orderSlice from './slices/orderSlice';
+import addressSlice from './slices/addressSlice';
 import recommendationSlice from './slices/recommendationSlice';
 
 export const store = configureStore({
@@ -19,6 +20,7 @@ export const store = configureStore({
     cart: cartSlice,
     wishlist: wishlistSlice,
     orders: orderSlice,
+    address: addressSlice,
     recommendations: recommendationSlice,
   },
 });

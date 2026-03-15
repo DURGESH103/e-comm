@@ -3,233 +3,202 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createOrder } from '../../store/slices/orderSlice';
 import { fetchCart, calculateTotals } from '../../store/slices/cartSlice';
+import { fetchAddresses, addAddress } from '../../store/slices/addressSlice';
+import AddressCard from '../../components/address/AddressCard';
+import AddressForm from '../../components/address/AddressForm';
 import Loading from '../../components/common/Loading';
 import { toast } from 'react-toastify';
 
 const Checkout = () => {
-  const [shippingAddress, setShippingAddress] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: ''
-  });
+  const dispatch  = useDispatch();
+  const navigate  = useNavigate();
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  
-  const { items, totalAmount, totalItems } = useSelector((state) => state.cart);
-  const { isLoading } = useSelector((state) => state.orders);
+  const { items, totalAmount, totalItems }    = useSelector((s) => s.cart);
+  const { isLoading: orderLoading }           = useSelector((s) => s.orders);
+  const { addresses, isLoading: addrLoading } = useSelector((s) => s.address);
 
+  const [selectedId, setSelectedId]   = useState(null);
+  const [showNewForm, setShowNewForm] = useState(false);
+
+  useEffect(() => { dispatch(fetchCart()); },     [dispatch]);
+  useEffect(() => { dispatch(fetchAddresses()); }, [dispatch]);
+  useEffect(() => { dispatch(calculateTotals()); }, [items, dispatch]);
+
+  // Auto-select default address once loaded
   useEffect(() => {
-    dispatch(fetchCart());
-  }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(calculateTotals());
-  }, [items, dispatch]);
-
-  useEffect(() => {
-    if (items.length === 0) {
-      navigate('/cart');
+    if (addresses.length > 0 && !selectedId) {
+      const def = addresses.find((a) => a.isDefault) || addresses[0];
+      setSelectedId(def._id);
     }
+  }, [addresses, selectedId]);
+
+  useEffect(() => {
+    if (items.length === 0) navigate('/cart');
   }, [items, navigate]);
 
-  const handleInputChange = (e) => {
-    setShippingAddress({
-      ...shippingAddress,
-      [e.target.name]: e.target.value
-    });
+  const handleAddNew = async (formData) => {
+    const res = await dispatch(addAddress(formData));
+    if (res.type.endsWith('/fulfilled')) {
+      toast.success('Address saved!');
+      setSelectedId(res.payload._id);
+      setShowNewForm(false);
+    } else {
+      toast.error(res.payload || 'Failed to save address');
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validate form
-    if (!shippingAddress.name || !shippingAddress.phone || !shippingAddress.address || 
-        !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
-      toast.error('Please fill in all shipping details');
+  const handlePlaceOrder = async () => {
+    if (!selectedId) {
+      toast.error('Please select a delivery address');
       return;
     }
+    const addr = addresses.find((a) => a._id === selectedId);
+    if (!addr) return;
 
-    try {
-      const result = await dispatch(createOrder({ shippingAddress }));
-      if (result.type === 'orders/createOrder/fulfilled') {
-        toast.success('Order placed successfully!');
-        navigate(`/orders/${result.payload.order._id}`);
-      }
-    } catch (error) {
-      toast.error('Failed to place order');
+    // Build shippingAddress in the shape the existing orderController expects
+    const shippingAddress = {
+      name:    addr.fullName,
+      phone:   addr.phone,
+      address: `${addr.houseNumber}, ${addr.street}`,
+      city:    addr.city,
+      state:   addr.state,
+      pincode: addr.pincode,
+    };
+
+    const res = await dispatch(createOrder({ shippingAddress }));
+    if (res.type.endsWith('/fulfilled')) {
+      toast.success('Order placed successfully!');
+      navigate(`/orders/${res.payload.order._id}`);
+    } else {
+      toast.error(res.payload || 'Failed to place order');
     }
   };
 
-  if (items.length === 0) {
-    return <Loading text="Loading..." />;
-  }
+  if (items.length === 0) return <Loading text="Loading…" />;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
-      
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">Checkout</h1>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Shipping Form */}
+
+        {/* ── LEFT: Delivery Address ── */}
         <div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-6">Shipping Address</h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={shippingAddress.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={shippingAddress.phone}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address *
-                </label>
-                <textarea
-                  name="address"
-                  value={shippingAddress.address}
-                  onChange={handleInputChange}
-                  required
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-gray-900">Delivery Address</h2>
+              <button
+                onClick={() => setShowNewForm((v) => !v)}
+                className="text-xs text-blue-600 font-medium hover:underline"
+              >
+                {showNewForm ? 'Cancel' : '+ Add New'}
+              </button>
+            </div>
+
+            {/* Inline add-new form */}
+            {showNewForm && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <AddressForm
+                  onSubmit={handleAddNew}
+                  onCancel={() => setShowNewForm(false)}
+                  isLoading={addrLoading}
                 />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City *
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={shippingAddress.city}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    State *
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={shippingAddress.state}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Pincode *
-                  </label>
-                  <input
-                    type="text"
-                    name="pincode"
-                    value={shippingAddress.pincode}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
+            )}
+
+            {/* Saved addresses */}
+            {addrLoading && addresses.length === 0 ? (
+              <div className="space-y-3">
+                {[1, 2].map((i) => <div key={i} className="skeleton h-28 rounded-xl" />)}
               </div>
-              
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full btn-primary mt-6"
-              >
-                {isLoading ? <div className="loading-spinner"></div> : 'Place Order'}
-              </button>
-            </form>
+            ) : addresses.length === 0 && !showNewForm ? (
+              <div className="text-center py-8 text-gray-500 text-sm">
+                <p>No saved addresses.</p>
+                <button
+                  onClick={() => setShowNewForm(true)}
+                  className="mt-2 text-blue-600 font-medium hover:underline"
+                >
+                  Add an address to continue
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {addresses.map((addr) => (
+                  <AddressCard
+                    key={addr._id}
+                    address={addr}
+                    selectable
+                    selected={selectedId === addr._id}
+                    onSelect={() => setSelectedId(addr._id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        
-        {/* Order Summary */}
+
+        {/* ── RIGHT: Order Summary ── */}
         <div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
-            
-            {/* Order Items */}
-            <div className="space-y-4 mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">Order Summary</h2>
+
+            <div className="space-y-3 mb-5">
               {items.map((item) => (
-                <div key={item.product._id} className="flex items-center space-x-3">
+                <div key={item.product._id} className="flex items-center gap-3">
                   <img
-                    src={item.product.images[0]}
+                    src={item.product.images?.[0]}
                     alt={item.product.name}
-                    className="w-16 h-16 object-cover rounded-md"
+                    className="w-14 h-14 object-contain rounded-lg border border-gray-100 bg-gray-50"
                   />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">{item.product.name}</h4>
-                    <p className="text-gray-600">Qty: {item.quantity}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{item.product.name}</p>
+                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                   </div>
-                  <p className="font-semibold">
+                  <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
                     ₹{(item.product.price * item.quantity).toLocaleString()}
                   </p>
                 </div>
               ))}
             </div>
-            
-            {/* Totals */}
-            <div className="border-t pt-4 space-y-2">
-              <div className="flex justify-between">
+
+            <div className="border-t pt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-gray-600">
                 <span>Items ({totalItems})</span>
                 <span>₹{totalAmount.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span className="text-green-600">Free</span>
+              <div className="flex justify-between text-gray-600">
+                <span>Delivery</span>
+                <span className="text-green-600 font-medium">Free</span>
               </div>
-              <div className="flex justify-between font-semibold text-lg border-t pt-2">
+              <div className="flex justify-between font-bold text-base border-t pt-3 text-gray-900">
                 <span>Total</span>
                 <span>₹{totalAmount.toLocaleString()}</span>
               </div>
             </div>
-            
-            {/* Payment Info */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-md">
-              <p className="text-sm text-gray-600">
-                <strong>Payment:</strong> Cash on Delivery
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Payment integration (Razorpay/Stripe) can be added later
-              </p>
+
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-500">
+              <strong className="text-gray-700">Payment:</strong> Cash on Delivery
             </div>
+
+            <button
+              onClick={handlePlaceOrder}
+              disabled={orderLoading || !selectedId}
+              className="w-full mt-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold
+                         rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {orderLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Placing Order…
+                </span>
+              ) : 'Place Order'}
+            </button>
           </div>
         </div>
+
       </div>
     </div>
   );

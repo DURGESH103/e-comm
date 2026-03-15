@@ -140,6 +140,18 @@ const getSubCategories = async (req, res) => {
   res.json({ success: true, subCategories });
 };
 
+const getProductVariants = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+      .select('attributes variants')
+      .lean();
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json({ success: true, attributes: product.attributes, variants: product.variants });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   getProducts,
   getProduct,
@@ -148,4 +160,5 @@ module.exports = {
   deleteProduct,
   getCategories,
   getSubCategories,
+  getProductVariants,
 };

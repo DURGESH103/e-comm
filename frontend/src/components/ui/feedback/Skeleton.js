@@ -1,48 +1,53 @@
 import React from 'react';
 
-const Skeleton = ({ 
-  variant = 'rectangular', 
-  width = 'w-full', 
-  height = 'h-4',
-  className = '',
-  ...props 
-}) => {
-  const baseClasses = 'animate-pulse bg-slate-200 rounded-xl';
-  
-  const variants = {
-    rectangular: 'rounded-xl',
-    circular: 'rounded-full',
-    text: 'rounded-md'
-  };
+const Shimmer = ({ className = '' }) => (
+  <div className={`skeleton rounded-xl ${className}`} />
+);
 
-  return (
-    <div
-      className={`${baseClasses} ${variants[variant]} ${width} ${height} ${className}`}
-      {...props}
-    />
-  );
-};
-
-// Skeleton compositions for common use cases
 export const ProductCardSkeleton = () => (
-  <div className="bg-white rounded-2xl shadow-md p-6 space-y-4">
-    <Skeleton variant="rectangular" height="h-48" />
-    <div className="space-y-2">
-      <Skeleton height="h-4" width="w-3/4" />
-      <Skeleton height="h-3" width="w-1/2" />
-      <Skeleton height="h-6" width="w-1/3" />
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <Shimmer className="h-52 w-full rounded-none" />
+    <div className="p-4 space-y-3">
+      <Shimmer className="h-3 w-1/3" />
+      <Shimmer className="h-4 w-full" />
+      <Shimmer className="h-4 w-4/5" />
+      <div className="flex items-center gap-2 pt-1">
+        <Shimmer className="h-5 w-1/3" />
+        <Shimmer className="h-4 w-1/4" />
+      </div>
+      <Shimmer className="h-9 w-full mt-2" />
     </div>
   </div>
 );
 
-export const ListItemSkeleton = () => (
-  <div className="flex items-center space-x-4 p-4">
-    <Skeleton variant="circular" width="w-12" height="h-12" />
-    <div className="flex-1 space-y-2">
-      <Skeleton height="h-4" width="w-3/4" />
-      <Skeleton height="h-3" width="w-1/2" />
+export const SliderCardSkeleton = () => (
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-44 sm:w-52 flex-shrink-0">
+    <Shimmer className="h-44 w-full rounded-none" />
+    <div className="p-3 space-y-2">
+      <Shimmer className="h-3 w-1/3" />
+      <Shimmer className="h-4 w-full" />
+      <Shimmer className="h-4 w-3/4" />
+      <Shimmer className="h-5 w-1/2" />
     </div>
   </div>
+);
+
+export const BannerSkeleton = () => (
+  <Shimmer className="w-full h-64 sm:h-80 lg:h-96 rounded-2xl" />
+);
+
+export const ListItemSkeleton = () => (
+  <div className="flex items-center space-x-4 p-4">
+    <Shimmer className="w-12 h-12 rounded-full" />
+    <div className="flex-1 space-y-2">
+      <Shimmer className="h-4 w-3/4" />
+      <Shimmer className="h-3 w-1/2" />
+    </div>
+  </div>
+);
+
+const Skeleton = ({ variant = 'rectangular', width = 'w-full', height = 'h-4', className = '' }) => (
+  <Shimmer className={`${variant === 'circular' ? 'rounded-full' : 'rounded-xl'} ${width} ${height} ${className}`} />
 );
 
 export default Skeleton;
