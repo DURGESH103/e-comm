@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { getCategories } from '../../store/slices/adminSlice';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 
 const AddProduct = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.admin);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -39,10 +35,6 @@ const AddProduct = () => {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -107,14 +99,10 @@ const AddProduct = () => {
         isFeatured: formData.isFeatured
       };
 
-      console.log('Sending product data:', JSON.stringify(productData, null, 2));
-      const response = await api.post('/admin/products', productData);
-      console.log('Response:', response.data);
+      await api.post('/admin/products', productData);
       toast.success('Product added successfully');
       navigate('/admin/products');
     } catch (error) {
-      console.error('Error adding product:', error);
-      console.log('Error response:', JSON.stringify(error.response?.data, null, 2));
       toast.error(error.response?.data?.message || error.message || 'Failed to add product');
     } finally {
       setIsLoading(false);
