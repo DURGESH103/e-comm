@@ -1,16 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { fetchCart, calculateTotals } from '../../store/slices/cartSlice';
+import { fetchCategories } from '../../store/slices/productSlice';
+
+const categoryIcons = {
+  Electronics: '📱', Clothing: '👕', Books: '📚',
+  Home: '🏠', Sports: '⚽', Beauty: '💄', Toys: '🧸'
+};
+
+const getCategoryPath = (category) =>
+  category.toLowerCase() === 'clothing'
+    ? '/clothing'
+    : `/category/${category.toLowerCase()}`;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+  const lastScrollY = useRef(0);
+
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { items, totalItems } = useSelector((state) => state.cart);
+  const { categories } = useSelector((state) => state.products);
+  const location = useLocation();
+
+  const handleScroll = useCallback(() => {
+    const currentY = window.scrollY;
+    setScrolled(currentY > 60);
+    lastScrollY.current = currentY;
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -184,6 +214,73 @@ const Header = () => {
             </div>
           </div>
         )}
+      </div>
+      {/* Category Nav Bar */}
+      <div
+        className="bg-gradient-to-r from-slate-50 via-white to-slate-50 border-t border-slate-200 overflow-hidden"
+        style={{
+          boxShadow: '0 2px 8px 0 rgba(99,102,241,0.06)',
+          transition: 'max-height 0.35s cubic-bezier(0.4,0,0.2,1), padding 0.35s cubic-bezier(0.4,0,0.2,1)',
+          maxHeight: scrolled ? '44px' : '90px',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between md:justify-center overflow-x-auto scrollbar-hide gap-1"
+            style={{
+              transition: 'padding 0.35s cubic-bezier(0.4,0,0.2,1)',
+              padding: scrolled ? '6px 0' : '8px 0',
+            }}
+          >
+            {categories.map((category) => {
+              const href = getCategoryPath(category);
+              const active = location.pathname === href;
+              return (
+                <Link
+                  key={category}
+                  to={href}
+                  className={`group flex-shrink-0 flex items-center rounded-2xl transition-all duration-300
+                    ${ active
+                      ? 'bg-indigo-50 shadow-md shadow-indigo-100'
+                      : 'hover:bg-white hover:shadow-md hover:shadow-slate-200'
+                    }`}
+                  style={{
+                    flexDirection: scrolled ? 'row' : 'column',
+                    gap: scrolled ? '6px' : '6px',
+                    padding: scrolled ? '4px 12px' : '8px 16px',
+                    transition: 'all 0.35s cubic-bezier(0.4,0,0.2,1)',
+                  }}
+                >
+                  <div
+                    className={`rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300
+                      ${ active
+                        ? 'bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg shadow-indigo-200'
+                        : 'bg-gradient-to-br from-slate-100 to-slate-200 group-hover:from-indigo-100 group-hover:to-purple-100'
+                      }`}
+                    style={{
+                      width: scrolled ? '26px' : '44px',
+                      height: scrolled ? '26px' : '44px',
+                      transition: 'all 0.35s cubic-bezier(0.4,0,0.2,1)',
+                    }}
+                  >
+                    <span
+                      className="leading-none transition-all duration-300"
+                      style={{ fontSize: scrolled ? '13px' : '20px' }}
+                    >
+                      {categoryIcons[category] || '📦'}
+                    </span>
+                  </div>
+                  <span
+                    className={`font-semibold whitespace-nowrap tracking-wide transition-all duration-300
+                      ${active ? 'text-indigo-600' : 'text-slate-500 group-hover:text-indigo-600'}`}
+                    style={{ fontSize: scrolled ? '11px' : '11px' }}
+                  >
+                    {category}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </header>
   );

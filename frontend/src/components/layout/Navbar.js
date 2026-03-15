@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../../store/slices/authSlice';
 import { fetchCart, calculateTotals } from '../../../store/slices/cartSlice';
+import { fetchCategories } from '../../../store/slices/productSlice';
 import Button from '../../ui/buttons/Button';
 import Badge from '../../ui/feedback/Badge';
+
+const categoryIcons = {
+  Electronics: '📱', Clothing: '👕', Books: '📚',
+  Home: '🏠', Sports: '⚽', Beauty: '💄', Toys: '🧸'
+};
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,12 +22,16 @@ const Navbar = () => {
   
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { items, totalItems } = useSelector((state) => state.cart);
+  const { categories } = useSelector((state) => state.products);
+  const location = useLocation();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchCart());
-    }
+    if (isAuthenticated) dispatch(fetchCart());
   }, [dispatch, isAuthenticated]);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(calculateTotals());
@@ -281,6 +291,34 @@ const Navbar = () => {
                 </Link>
               </div>
             )}
+        </div>
+      </div>
+      {/* Category Nav Bar */}
+      <div className="bg-white border-t border-slate-100 shadow-sm">
+        <div className="flex justify-center overflow-x-auto scrollbar-hide">
+          <div className="flex items-center divide-x divide-slate-100">
+            {categories.map((category) => {
+              const href = `/category/${category}`;
+              const active = location.pathname === href;
+              return (
+                <Link
+                  key={category}
+                  to={href}
+                  className={`group flex-shrink-0 flex flex-col items-center gap-1 px-6 py-2.5 transition-all duration-200 relative
+                    ${active ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'}`}
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform duration-200 leading-none">
+                    {categoryIcons[category] || '📦'}
+                  </span>
+                  <span className="text-xs font-medium whitespace-nowrap">{category}</span>
+                  {active && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+                  )}
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-center" />
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </nav>

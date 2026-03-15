@@ -31,6 +31,7 @@ import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminClothingProducts from './pages/admin/AdminClothingProducts';
 import CreateClothingProduct from './pages/admin/CreateClothingProduct';
+import CategoryPage from './pages/CategoryPage';
 import ClothingPage from './pages/ClothingPage';
 import MenClothingPage from './pages/MenClothingPage';
 import WomenClothingPage from './pages/WomenClothingPage';
@@ -84,6 +85,7 @@ function AppContent() {
             <Route path="/clothing/men" element={<MenClothingPage />} />
             <Route path="/clothing/women" element={<WomenClothingPage />} />
             <Route path="/clothing/kids" element={<KidsClothingPage />} />
+            <Route path="/category/:category" element={<CategoryPage />} />
 
             {/* User Routes */}
             <Route path="/user/home" element={<ProtectedRoute userOnly><Home /></ProtectedRoute>} />
