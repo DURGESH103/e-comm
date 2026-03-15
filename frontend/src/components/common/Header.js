@@ -394,6 +394,57 @@ const Header = () => {
               transition: `padding 0.35s ${EASE}`,
             }}
           >
+            {/* For You tab — authenticated users only */}
+            {isAuthenticated && (() => {
+              const href   = '/for-you';
+              const active = location.pathname === href;
+              return (
+                <Link
+                  key="for-you"
+                  to={href}
+                  className={`group flex-shrink-0 flex items-center rounded-2xl transition-all duration-300
+                    ${active
+                      ? 'bg-indigo-50 shadow-sm shadow-indigo-100'
+                      : 'hover:bg-white hover:shadow-md hover:shadow-slate-200 hover:-translate-y-px'
+                    }`}
+                  style={{
+                    flexDirection: scrolled ? 'row' : 'column',
+                    gap:           scrolled ? '5px' : '5px',
+                    padding:       scrolled ? '4px 10px' : '6px 14px',
+                    transition:    `all 0.35s ${EASE}`,
+                  }}
+                >
+                  <div
+                    className={`rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300
+                      ${active
+                        ? 'bg-gradient-to-br from-pink-500 to-rose-500 shadow-md shadow-pink-200'
+                        : 'bg-gradient-to-br from-pink-100 to-rose-100 group-hover:from-pink-200 group-hover:to-rose-200'
+                      }`}
+                    style={{
+                      width:      scrolled ? '24px' : '42px',
+                      height:     scrolled ? '24px' : '42px',
+                      transition: `all 0.35s ${EASE}`,
+                    }}
+                  >
+                    <span
+                      className="leading-none transition-all duration-300 group-hover:scale-110"
+                      style={{ fontSize: scrolled ? '12px' : '19px' }}
+                    >
+                      ✨
+                    </span>
+                  </div>
+                  <span
+                    className={`font-semibold whitespace-nowrap tracking-wide transition-colors duration-200
+                      ${active ? 'text-pink-600' : 'text-slate-500 group-hover:text-pink-600'}`}
+                    style={{ fontSize: '11px' }}
+                  >
+                    For You
+                  </span>
+                </Link>
+              );
+            })()}
+
+            {/* Regular category tabs */}
             {categories.map((category) => {
               const href   = getCategoryPath(category);
               const active = location.pathname === href;

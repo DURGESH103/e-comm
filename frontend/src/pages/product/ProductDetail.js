@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProduct } from '../../store/slices/productSlice';
+import { trackProductView } from '../../store/slices/recommendationSlice';
 import { addToCart } from '../../store/slices/cartSlice';
 import { addToWishlist, removeFromWishlist } from '../../store/slices/wishlistSlice';
 import Loading from '../../components/common/Loading';
@@ -22,6 +23,11 @@ const ProductDetail = () => {
   useEffect(() => {
     dispatch(fetchProduct(id));
   }, [dispatch, id]);
+
+  // Track this product as recently viewed (stored in localStorage)
+  useEffect(() => {
+    if (id) trackProductView(id);
+  }, [id]);
 
   const handleAddToCart = () => {
     if (!isAuthenticated) {
